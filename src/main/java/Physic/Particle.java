@@ -1,29 +1,29 @@
+package Physic;
+
+import Graphics.Rectangle;
+import Utils.Color;
 import processing.core.PApplet;
 import processing.core.PVector;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Particle {
-    static PApplet p;
+    public static PApplet p;
     private PVector position;
     private PVector velocity = new PVector();
-    private List<Particle> targets;
 
     private float size = 200;
     private float newSize = size;
     private int index;
 
     private int tiles;
-    int tilesCount = 0;
-    private int[] color = new int[4];
+    private int tilesCount = 0;
+    private Color color;
 
     public Particle(float posX, float posY) {
         position = new PVector(posX, posY);
         velocity.set(p.random(-0.8f,0.8f), 0);
-    }
-
-    public void setTarget(List<Particle> targets) {
-        this.targets = targets;
     }
 
     public Particle setSize(float size) {
@@ -34,10 +34,7 @@ public class Particle {
     }
 
     public Particle setColor(int... color) {
-        this.color[0] = color[0];
-        this.color[1] = color[1];
-        this.color[2] = color[2];
-        this.color[3] = 50;
+        this.color = new Color(color);
          return this;
     }
 
@@ -63,57 +60,72 @@ public class Particle {
         return newSize;
     }
 
-    public int[] getColor() {
+    public Color getColor() {
+        tilesCount++;
         return color;
     }
 
-    public void show(){
-//        p.fill(9, 143, 134, 20);
-//        p.stroke(0);
-//        p.ellipse(position.x, position.y, size*2, size*2);
+    public int getTilesCount() {
+        return tilesCount;
+    }
+
+    public Particle setTilesCount(int tilesCount) {
+        this.tilesCount = tilesCount;
+        return this;
     }
 
     public void update(){
         position.add(velocity);
 
-        if(tilesCount < tiles * 0.99){
+        if(tilesCount < tiles * 0.95){
             newSize += 0.5;
-        } else if(tilesCount> tiles * 1.01){
+        } else if(tilesCount> tiles * 1.05){
             newSize -= 0.5;
         }
     }
 
-    public void attracted(){
+    public void attracted(List<Particle> targets){
 
         /*
-            Attraction function is defined by sigmoid type function
+            Extracting positions of particles from objects and excluding instance position
+         */
+        List<PVector> positions = targets.stream()
+                .map(Particle::getPosition)
+                .filter(position -> !position.equals(this.position))
+                .collect(Collectors.toList());
+
+        /*
+            Attraction is defined by sigmoid -like function
             y = ( -g / (0.5 + exp( k*( x-(t/2) ) ) ) ) + g
             where
                 g is a step value (denotes max and min)
                 k is a slope value
                 t is a 0 point (Equilibrium point) roughly x = 2*t
-
          */
+
         velocity = new PVector();
 
-        for(Particle target:targets) {
+        for(PVector target:positions) {
             PVector targetVector = new PVector();
-            targetVector.set(target.position).sub(position).normalize();
+            targetVector.set(target).sub(position).normalize();
 
-            float x = target.position.dist(position) / 20;//target.position.dist(position) / 20;
-            float t = 25;//size/4;
-            float g = 2f;//2f;
-            float k = 1;//1;
+            float x = target.dist(position) / 20;
+            float t =  2500/size;//20;//1800/size;//size / 10 ;//3000/size;//30;
+            float g = 1f;
+            float k = 2;
             float y = (float) (-g / (0.5 + Math.exp((k * (x - (t / 2))))) + g);
 
             velocity.add(targetVector.mult(y));
         }
 
+        // add attraction to the center
+        PVector toCenter = new PVector().set(0, 0).sub(position).mult(0.005f);
+        velocity.add(toCenter);
     }
 
     @Override
     public String toString() {
-        return "Particle{" +
+        return "Physic.Particle{" +
                 "index=" + index +
                 ", size=" + size +
                 '}';

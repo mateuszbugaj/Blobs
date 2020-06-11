@@ -1,15 +1,19 @@
+package Graphics;
+
+import Utils.Color;
 import processing.core.PApplet;
 import processing.core.PVector;
 
 public class Rectangle {
-    static PApplet p;
+    public static PApplet p;
     PVector position;
-    static float SIZE = 4;
+    public static float SIZE = 4;
     int[] color;
 
-    public Rectangle(PVector position, int... color) {
+
+    public Rectangle(PVector position, Color color) {
         this.position = position;
-        this.color = color;
+        this.color = color.getValues();
     }
 
     public void show(){
