@@ -6,6 +6,8 @@ import processing.core.PVector;
 import processing.event.MouseEvent;
 
 import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Main extends PApplet {
 
@@ -106,6 +108,12 @@ public class Main extends PApplet {
                 float centerYValue = -(rowsOfRectanglesToConsider/2) * Rectangle.SIZE + row * Rectangle.SIZE;
                 pos.y = round(centerYValue, Rectangle.SIZE);
 
+                /*
+                    Check in which particles tile can be.
+                    Then sort them based on their distance to this tile divided by size.
+                    Then take first and extract color. If none is found, embrace color of the background.
+                 */
+
                 Color color = particles.stream()
                         .filter(p -> p.getPosition().dist(pos) < p.getSize())
                         .min((particle1, particle2) -> {
@@ -123,6 +131,12 @@ public class Main extends PApplet {
         return rectangles;
     }
 
+    /**
+     *
+     * @param value1 - value to be rounded
+     * @param value2 - value to which round
+     * @return - value1 rounded to value2
+     */
     public float round(float value1, float value2){
         if(value1%value2 < value2/2){
             value1 = (int)(value1/value2)*value2;
