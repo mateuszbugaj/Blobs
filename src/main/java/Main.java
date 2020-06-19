@@ -85,6 +85,9 @@ public class Main extends PApplet {
 //        particleC.setPosition(centerPosition);
 
         popMatrix();
+
+        fill(0);
+        text(frameRate, 0, 20);
     }
 
     /**
@@ -99,34 +102,91 @@ public class Main extends PApplet {
         Color backgroundColor = new Color(255, 255, 255);
         float rowsOfRectanglesToConsider = (area / Rectangle.SIZE);
 
+        BiFunction<Integer, Integer, PVector> calculatePosition = new BiFunction<Integer, Integer, PVector>() {
+            @Override
+            public PVector apply(Integer col, Integer row) {
+                PVector pos = new PVector();
+                int centerXValue =(int) (-(rowsOfRectanglesToConsider/2) * Rectangle.SIZE + col * Rectangle.SIZE);
+                pos.x = round(centerXValue, Rectangle.SIZE);
+                int centerYValue =(int) (-(rowsOfRectanglesToConsider/2) * Rectangle.SIZE + row * Rectangle.SIZE);
+                pos.y = round(centerYValue, Rectangle.SIZE);
+
+                return pos;
+            }
+        };
+
+        /*
+            Placing blobs
+         */
         for (int col = 0; col < rowsOfRectanglesToConsider; col++) {
             for (int row = 0; row < rowsOfRectanglesToConsider; row++) {
 
-                PVector pos = new PVector();
-                float centerXValue = -(rowsOfRectanglesToConsider/2) * Rectangle.SIZE + col * Rectangle.SIZE;
-                pos.x = round(centerXValue, Rectangle.SIZE);
-                float centerYValue = -(rowsOfRectanglesToConsider/2) * Rectangle.SIZE + row * Rectangle.SIZE;
-                pos.y = round(centerYValue, Rectangle.SIZE);
+                PVector pos = calculatePosition.apply(col, row);
 
                 /*
-                    Check in which particles tile can be.
+                    Check in which particles tile can be if it is in any.
                     Then sort them based on their distance to this tile divided by size.
-                    Then take first and extract color. If none is found, embrace color of the background.
+                    Then take first and extract color.
                  */
 
-                Color color = particles.stream()
+                if(particles.stream().anyMatch(p -> p.getPosition().dist(pos) < p.getSize())){
+                    Color color = particles.stream()
                         .filter(p -> p.getPosition().dist(pos) < p.getSize())
                         .min((particle1, particle2) -> {
                             float dist1 = pos.dist(particle1.getPosition()) / (particle1.getSize()/2);
                             float dist2 = pos.dist(particle2.getPosition()) / (particle2.getSize()/2);
                             return Float.compare(dist1, dist2);
                         })
-                        .map(Particle::getColor)
-                        .orElse(backgroundColor);
+                        .map(Particle::getColor).get();
 
-                rectangles.add(new Rectangle(pos, color));
+//                    PVector posLeft = calculatePosition.apply(col, row);
+//                    PVector posTop = calculatePosition.apply(col, row - 1);
+//
+//
+//                    boolean isOnTheEdge = rectangles.stream().noneMatch(rectangle -> {
+//                        PVector position = rectangle.getPosition();
+//                        return (position.x == posLeft.x && position.y == posLeft.y) || (position.x == posTop.x && position.y == posTop.y);
+//                    });
+//
+//                    if(isOnTheEdge){
+//                        color = new Color(0, 0, 0);
+//                    }
+
+                    rectangles.add(new Rectangle(pos, color));
+                }
             }
         }
+
+        /*
+            Placing borders
+         */
+//        for (int col = 0; col < rowsOfRectanglesToConsider; col++) {
+//            for (int row = 0; row < rowsOfRectanglesToConsider; row++) {
+//
+//                PVector pos = calculatePosition.apply(col, row);
+//
+//                if(particles.stream().anyMatch(p -> p.getPosition().dist(pos) < p.getSize())){
+//                    PVector posLeft = calculatePosition.apply(col - 1, row);
+//                    PVector posRight = calculatePosition.apply(col + 1, row);
+//                    PVector posTop = calculatePosition.apply(col, row - 1);
+//                    PVector posBottom = calculatePosition.apply(col, row + 1);
+//
+//                    List<PVector> neighbourPosition = new ArrayList<>();
+//                    neighbourPosition.add(posLeft);
+//                    neighbourPosition.add(posRight);
+//                    neighbourPosition.add(posTop);
+//                    neighbourPosition.add(posBottom);
+//
+//                    rectangles.stream().
+//
+//
+//
+//                }
+//
+//            }
+//        }
+
+
 
         return rectangles;
     }

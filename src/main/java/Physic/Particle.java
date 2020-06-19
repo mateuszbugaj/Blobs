@@ -20,6 +20,7 @@ public class Particle {
     private int tiles;
     private int tilesCount = 0;
     private Color color;
+    private Color borderColor = new Color(0, 0,0);
 
     public Particle(float posX, float posY) {
         position = new PVector(posX, posY);
@@ -37,6 +38,7 @@ public class Particle {
         this.color = new Color(color);
          return this;
     }
+
 
     public Particle setIndex(int index) {
         this.index = index;
@@ -63,6 +65,10 @@ public class Particle {
     public Color getColor() {
         tilesCount++;
         return color;
+    }
+
+    public Color getBorderColor() {
+        return borderColor;
     }
 
     public int getTilesCount() {

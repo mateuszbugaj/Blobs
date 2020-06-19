@@ -7,13 +7,17 @@ import processing.core.PVector;
 public class Rectangle {
     public static PApplet p;
     PVector position;
-    public static float SIZE = 4;
+    public static float SIZE = 5;
     int[] color;
 
 
     public Rectangle(PVector position, Color color) {
         this.position = position;
         this.color = color.getValues();
+    }
+
+    public PVector getPosition() {
+        return position;
     }
 
     public void show(){
